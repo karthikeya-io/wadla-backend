@@ -3,7 +3,7 @@ var serviceAccount = require('./serviceAccountKey.json');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  storageBucket: 'wadla1.appspot.com'
+  storageBucket: process.env.STORAGE_BUCKET
 });
 
 var bucket = admin.storage().bucket();
