@@ -86,6 +86,7 @@ exports.isSignedIn = (req, res, next) => {
     try {
         const decoded = jwt.verify(token, process.env.SECRET);
         req.admin = decoded;
+        req.adminId = decoded._id;
         console.log(decoded);
         next();
     }
@@ -94,4 +95,14 @@ exports.isSignedIn = (req, res, next) => {
             error: "Access denied",
         });
     }
+}
+
+exports.isAuthenticated = (req, res, next) => {
+    const checker = req.adminId && req.eventCreatorId && req.adminId === req.eventCreatorId;
+    if (!checker) {
+        return res.status(403).json({
+            error: "ACCESS DENIED",
+        });
+    }
+    next();
 }
