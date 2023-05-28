@@ -26,7 +26,6 @@ exports.signup = async (req, res) => {
 
 exports.signin = async (req, res) => {
     const { email, password } = req.body;
-    console.log(req.body);
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -73,16 +72,12 @@ exports.signout = (req, res) => {
 
 // protected routes
 exports.isSignedIn = (req, res, next) => {
-    // console.log(req.headers);
-    // console.log(req.headers.authorizati
-    // on);
     if (req.headers.authorization === undefined) {
         return res.status(401).json({
             error: "Access denied",
         });
     }
     const token = req.headers.authorization.split(" ")[1];
-    // console.log(token);
     if (!token) {
         return res.status(401).json({
             error: "Access denied",
@@ -91,6 +86,7 @@ exports.isSignedIn = (req, res, next) => {
     try {
         const decoded = jwt.verify(token, process.env.SECRET);
         req.admin = decoded;
+        console.log(decoded);
         next();
     }
     catch (err) {
