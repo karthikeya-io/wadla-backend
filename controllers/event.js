@@ -40,3 +40,25 @@ exports.getEvents = async (req, res) => {
     }
 }
 
+// middleware to get event creator
+
+exports.getEventCreatorById = async (req, res, next, id) => {
+    try {
+        const event = await Event.findById(id);
+        if (!event) {
+            return res.status(400).json({
+                error: 'Event not found'
+            });
+        }
+        req.event = event;
+        req.eventCreatorId = event.createdBy;
+        next();
+    } catch (err) {
+        console.log(err);
+        return res.status(400).json({
+            error: 'Error fetching event'
+        });
+    }
+}
+
+
