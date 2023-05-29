@@ -50,7 +50,8 @@ exports.signin = async (req, res) => {
         // put token in cookie
         // http only cookie
         // expiring time of cookie is 1 hour
-        res.cookie("token", token, { maxAge: 3600000 });
+        // samesite strict
+        res.cookie("token", token, { maxAge: 3600000, sameSite: 'strict' });
 
         // send response to front end
         const { _id, name } = admin;
@@ -98,7 +99,9 @@ exports.isSignedIn = (req, res, next) => {
 }
 
 exports.isAuthenticated = (req, res, next) => {
-    const checker = req.adminId && req.eventCreatorId && req.adminId === req.eventCreatorId;
+    console.log(req.adminId);
+    console.log(req.eventCreatorId);
+    const checker = req.adminId && req.eventCreatorId && req.eventCreatorId.equals(req.adminId);
     if (!checker) {
         return res.status(403).json({
             error: "ACCESS DENIED",
