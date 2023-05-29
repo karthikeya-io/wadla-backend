@@ -11,6 +11,7 @@ const cors = require('cors');
 const authRoutes = require('./routes/auth');
 // const bannerRoutes = require('./routes/banner');
 const eventRoutes = require('./routes/event');
+const speakerRoutes = require('./routes/speaker');
 
 // middleware
 app.use(bodyParser.json());
@@ -24,6 +25,7 @@ app.use(cors({
 app.use('/api', authRoutes);
 // app.use('/api', bannerRoutes);
 app.use('/api', eventRoutes);
+app.use('/api', speakerRoutes);
 
 
 // connect to mongoDB
