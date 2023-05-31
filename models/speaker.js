@@ -23,7 +23,7 @@ const speakerSchema = new Schema({
         maxlength: 128,
         trim: true
     },
-    field: {
+    workingField: {
         type: String,
         enum: ['Academia', 'Industry']
     },
