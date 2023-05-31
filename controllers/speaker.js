@@ -74,6 +74,12 @@ exports.getSpeakers = async (req, res) => {
 // };
 
 exports.uploadSpearkerPicToFirebase = async (req, res, next) => {
+
+  // if thers no file in req object then move to next middleware
+  if (!req.file) {
+    return next();
+  }
+
 	const uniqueId = uuidv4();
   const blob = bucket.file(`speakers/${uniqueId}.webp`);
   const blobStream = blob.createWriteStream({ resumable: false });
