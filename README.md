@@ -16,8 +16,8 @@ This is a backend api being built to host event pages for workshops, hackathons,
 4. run `npm start` and the server starts at port 5000
 
 ## links to other Repos
-Wadla Admin Frontend -> https://github.com/karthikeya-io/wadla-admin
-Wadla Home Page -> https://github.com/karthikeya-io/wadla
+- Wadla Admin Frontend -> https://github.com/karthikeya-io/wadla-admin
+- Wadla Home Page -> https://github.com/karthikeya-io/wadla
 
 # website
-Upcoming WADLA -> https://upcoming.wadla.in/
+- Upcoming WADLA -> https://upcoming.wadla.in/
