@@ -58,6 +58,19 @@ const registrationSchema = new Schema(
       maxlength: 5000,
       trim: true,
     },
+    registrationFee: {
+      type: Number,
+      required: true,
+    },
+    transactionNumber: {
+      type: String,
+      maxlength: 128,
+      trim: true,
+    },
+    registrationDate: {
+      type: Date,
+      required: true,
+    },
     paymentReceiptFileOrginalName: {
       type: String,
       maxlength: 128,
