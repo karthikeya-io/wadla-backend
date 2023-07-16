@@ -4,6 +4,7 @@ const bucket = require("../initializeFirebaseWadlaPrivate");
 const sharp = require("sharp");
 const { v4: uuidv4 } = require("uuid");
 const { Readable } = require("stream");
+const getSignedUrl = require("../utils/generateSignedUrlFB");
 
 exports.createRegistration = async (req, res) => {
   const errors = validationResult(req);
@@ -51,9 +52,38 @@ exports.getRegistrations = async (req, res) => {
   }
 };
 
+exports.getIdProofURL = async (req, res) => {
+  try {
+    const url = await getSignedUrl(`idProofs/${req.idProofFileName}`);
+    return res.status(200).json({
+      url,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json({
+      error: "Error fetching id proof",
+    });
+  }
+};
+
+exports.getReceiptURL = async (req, res) => {
+  try {
+    const url = await getSignedUrl(`receipts/${req.receiptFileName}`);
+    console.log("hello");
+    console.log(req.receiptFileName);
+    return res.status(200).json({
+      url,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json({
+      error: "Error fetching receipt",
+    });
+  }
+};
+
 // middle ware
 // upload receipt to firebase (pdfs)
-
 exports.uploadReceiptToFirebase = async (req, res, next) => {
   const uniqueId = uuidv4();
   const blob = bucket.file(`receipts/${uniqueId}.pdf`);
@@ -111,4 +141,44 @@ exports.uploadIdProofToFirebase = async (req, res, next) => {
         error: "Error uploading speaker pic speaker not created",
       });
     });
+};
+
+// get id proof file name using registration id
+exports.getIdProofFileName = async (req, res, next) => {
+  try {
+    const registration = await Registration.findById(req.params.registrationId);
+    if (!registration || !req.event._id.equals(registration.event)) {
+      return res.status(400).json({
+        error: "Registration not found",
+      });
+    }
+    req.idProofFileName = registration.idProofFileName;
+    next();
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json({
+      error: "Error fetching registration",
+    });
+  }
+};
+
+// get receipt file name using registration id
+exports.getReceiptFileName = async (req, res, next) => {
+  try {
+    const registration = await Registration.findById(req.params.registrationId);
+    if (!registration || !req.event._id.equals(registration.event)) {
+      return res.status(400).json({
+        error: "Registration not found",
+      });
+    }
+    console.log("hi");
+    console.log(registration.PaymentReceiptFileName);
+    req.receiptFileName = registration.PaymentReceiptFileName;
+    next();
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json({
+      error: "Error fetching registration",
+    });
+  }
 };
