@@ -8,11 +8,18 @@ const {
   getRegistrations,
   uploadReceiptToFirebase,
   uploadIdProofToFirebase,
+  getIdProofFileName,
+  getIdProofURL,
+  getReceiptFileName,
+  getReceiptURL,
 } = require("../controllers/registration");
+const { isSignedIn, isAuthenticated } = require("../controllers/auth");
 
 const upload = multer({ storage: multer.memoryStorage() });
 
 router.param("eventId", getEventCreatorById);
+
+router.get("/register/:eventId", isSignedIn, isAuthenticated, getRegistrations);
 
 router.post(
   "/register/:eventId",
@@ -31,6 +38,22 @@ router.post(
   uploadReceiptToFirebase,
   uploadIdProofToFirebase,
   createRegistration
+);
+
+router.get(
+  "/register/idproof/:eventId/:registrationId",
+  isSignedIn,
+  isAuthenticated,
+  getIdProofFileName,
+  getIdProofURL
+);
+
+router.get(
+  "/register/receipt/:eventId/:registrationId",
+  isSignedIn,
+  isAuthenticated,
+  getReceiptFileName,
+  getReceiptURL
 );
 
 module.exports = router;
