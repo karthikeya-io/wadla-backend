@@ -5,6 +5,15 @@ const sharp = require("sharp");
 const { v4: uuidv4 } = require("uuid");
 const { Readable } = require("stream");
 const getSignedUrl = require("../utils/generateSignedUrlFB");
+const nodeMailer = require("nodemailer");
+
+let transporter = nodeMailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL,
+    pass: process.env.EMAIL_PASSWORD,
+  },
+});
 
 exports.createRegistration = async (req, res) => {
   const errors = validationResult(req);
@@ -19,6 +28,49 @@ exports.createRegistration = async (req, res) => {
   try {
     const registration = new Registration(data);
     await registration.save();
+
+    setImmediate(() => {
+      transporter.sendMail(
+        {
+          from: process.env.EMAIL,
+          to: registration.email,
+          subject: "Registration Successful 🎉 ",
+          html: `<h1>Registration Successful!</h1>
+          <p>Hi ${registration.name},</p>
+          <p>Thank you for registering for WADLA 2023.</p>
+          <p>Regards,</p>
+          <p
+          style="
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: .8rem;
+            font-weight: 400;
+            line-spacing: 1px;
+            margin-top: -12px;
+          "
+          >Team Wadla</p>
+          <p
+          style="
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: .8rem;
+            font-weight: 400;
+            margin-top: -12px;
+          "
+          >For any queries, please contact us at wadla@iiits.in</p>
+          <a
+          href="https://wadla.in"
+          >https://wadla.in</a>
+        `,
+        },
+        (err, info) => {
+          if (err) {
+            console.log(err);
+          } else {
+            console.log(info);
+          }
+        }
+      );
+    });
+
     return res.status(200).json({
       message: "Registration created successfully",
       registration,
@@ -69,7 +121,6 @@ exports.getIdProofURL = async (req, res) => {
 exports.getReceiptURL = async (req, res) => {
   try {
     const url = await getSignedUrl(`receipts/${req.receiptFileName}`);
-    console.log("hello");
     console.log(req.receiptFileName);
     return res.status(200).json({
       url,
@@ -171,7 +222,6 @@ exports.getReceiptFileName = async (req, res, next) => {
         error: "Registration not found",
       });
     }
-    console.log("hi");
     console.log(registration.PaymentReceiptFileName);
     req.receiptFileName = registration.PaymentReceiptFileName;
     next();
