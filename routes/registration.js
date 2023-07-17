@@ -23,10 +23,6 @@ router.get("/register/:eventId", isSignedIn, isAuthenticated, getRegistrations);
 
 router.post(
   "/register/:eventId",
-  (req, res, next) => {
-    console.log(req.body);
-    next();
-  },
   upload.fields([
     { name: "receipt", maxCount: 1 },
     { name: "proof", maxCount: 1 },
