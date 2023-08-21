@@ -1,4 +1,5 @@
-require("dotenv").config();
+const environment = process.env.NODE_ENV || "development";
+require("dotenv").config({ path: `.env.${environment}` });
 const express = require("express");
 const app = express();
 const port = 5000;
@@ -34,7 +35,7 @@ app.use("/api", registrationRoutes);
 // connect to mongoDB
 //DB Connection
 exports.dbConnect = mongoose
-  .connect(process.env.TEST_DB_CONNECT, {
+  .connect(process.env.DB_CONNECT, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })

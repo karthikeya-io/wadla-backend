@@ -1,5 +1,7 @@
 node_modules
 .env
+.env.development
+.env.production
 serviceAccountKey.json
 temp.json
 serviceAccountKeyWadlaPrivate.json
