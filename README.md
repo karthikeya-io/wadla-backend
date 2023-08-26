@@ -20,4 +20,4 @@ This is a backend api being built to host event pages for workshops, hackathons,
 - Wadla Home Page -> https://github.com/karthikeya-io/wadla
 
 # website
-- Upcoming WADLA -> https://upcoming.wadla.in/
+- WADLA -> https://wadla.in/
