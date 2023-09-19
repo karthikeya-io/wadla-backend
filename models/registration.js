@@ -15,6 +15,7 @@ const registrationSchema = new Schema(
       maxlength: 128,
       trim: true,
       unique: true,
+      required: true,
     },
     phoneNumber: {
       type: String,
@@ -47,6 +48,10 @@ const registrationSchema = new Schema(
         "Faculty/Educator - Foreign",
         "Industry/R&D Person - Foreign",
       ],
+    },
+    mode: {
+      type: String,
+      enum: ["online", "offline"],
     },
     previousWorkshop: {
       type: String,
