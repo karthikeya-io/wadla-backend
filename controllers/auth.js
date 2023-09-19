@@ -1,6 +1,17 @@
 const Admin = require("../models/admin");
+const User = require("../models/registration");
+const Otp = require("../models/otp");
 const { check, validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
+const nodeMailer = require("nodemailer");
+
+let transporter = nodeMailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL,
+    pass: process.env.EMAIL_PASSWORD,
+  },
+});
 
 exports.signup = async (req, res) => {
   const errors = validationResult(req);
@@ -73,7 +84,79 @@ exports.signout = (req, res) => {
   });
 };
 
+// routes for registered user for WADLA
+// otp based password reset and creation
+
+exports.getOtpForPasswordReset = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({
+        error: "User with given email does not exists",
+      });
+    }
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    const otpData = new Otp({
+      email,
+      otp,
+    });
+    await otpData.save();
+    // send otp to email
+
+    const mailOptions = {
+      from: process.env.EMAIL,
+      to: email,
+      subject: "OTP for password reset",
+      text: `Your OTP for password reset is ${otp} valid for 10 minutes`,
+    };
+
+    transporter.sendMail(mailOptions, (err, info) => {
+      if (err) {
+        console.log(err);
+        return res.status(400).json({
+          error: "OTP not sent",
+        });
+      } else {
+        console.log("Email sent: " + info.response);
+        return res.status(200).json({
+          message: "OTP sent successfully",
+        });
+      }
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json({
+      error: "Error sending otp",
+    });
+  }
+};
+
+exports.setNewPassword = async (req, res) => {
+  const { email, otp, password } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({
+        error: "User with given email does not exists",
+      });
+    }
+
+    user.password = password;
+    await user.save();
+    return res.status(200).json({
+      message: "Password updated successfully",
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json({
+      error: "Error updating password",
+    });
+  }
+};
+
 // protected routes
+// middle ware
 exports.isSignedIn = (req, res, next) => {
   if (req.headers.authorization === undefined) {
     return res.status(401).json({
@@ -110,4 +193,29 @@ exports.isAuthenticated = (req, res, next) => {
     });
   }
   next();
+};
+
+exports.isOtpValid = async (req, res, next) => {
+  const { email, otp } = req.body;
+  try {
+    const otpDb = await Otp.findOne({ email });
+    if (!otpDb) {
+      return res.status(400).json({
+        error: "OTP not generated",
+      });
+    }
+    if (otpDb.otp !== otp) {
+      return res.status(400).json({
+        error: "OTP is not valid or expired",
+      });
+    }
+    if (otpDb.otp === otp && otpDb.expireAt > Date.now()) {
+      next();
+    }
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json({
+      error: "Error validating otp",
+    });
+  }
 };
