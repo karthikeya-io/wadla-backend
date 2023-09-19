@@ -5,7 +5,7 @@ const generateSignedUrl = async (filePath) => {
 
   const options = {
     action: "read",
-    expires: Date.now() + 15 * 60 * 1000, // 15 minutes
+    expires: Date.now() + 60 * 60 * 1000,
   };
 
   const [url] = await file.getSignedUrl(options);
