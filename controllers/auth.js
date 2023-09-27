@@ -8,8 +8,8 @@ const nodeMailer = require("nodemailer");
 let transporter = nodeMailer.createTransport({
   service: "gmail",
   auth: {
-    user: process.env.EMAIL,
-    pass: process.env.EMAIL_PASSWORD,
+    user: process.env.EMAIL_OTP,
+    pass: process.env.EMAIL_OTP_PASSWORD,
   },
 });
 
@@ -96,6 +96,7 @@ exports.getOtpForPasswordReset = async (req, res) => {
         error: "User with given email does not exists",
       });
     }
+    await Otp.deleteMany({ email });
     const otp = Math.floor(100000 + Math.random() * 900000);
     const otpData = new Otp({
       email,
@@ -155,6 +156,59 @@ exports.setNewPassword = async (req, res) => {
   }
 };
 
+// routes for signin for registered user for WADLA
+exports.signinForRegisteredUser = async (req, res) => {
+  const { email, password } = req.body;
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(422).json({
+      error: errors.array()[0].msg,
+    });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({
+        error: "User email does not exists",
+      });
+    }
+    if (!user.authenticate(password)) {
+      return res.status(401).json({
+        error: "Email and password do not match",
+      });
+    }
+    const token = jwt.sign(
+      { _id: user._id, event: user.event },
+      process.env.SECRET,
+      {
+        expiresIn: "24h",
+      }
+    );
+
+    // put token in cookie
+    // http only cookie
+    // expiring time of cookie is 24 hour
+    // samesite strict
+    res.cookie("token", token, { maxAge: 86400000, sameSite: "strict" });
+
+    // send response to front end
+    const { _id, name } = user;
+    return res.json({
+      token,
+      user: { _id, name, email },
+      event: user.event,
+      status: "success",
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json({
+      error: "Email does not exists",
+    });
+  }
+};
+
 // protected routes
 // middle ware
 exports.isSignedIn = (req, res, next) => {
@@ -196,7 +250,7 @@ exports.isAuthenticated = (req, res, next) => {
 };
 
 exports.isOtpValid = async (req, res, next) => {
-  const { email, otp } = req.body;
+  let { email, otp } = req.body;
   try {
     const otpDb = await Otp.findOne({ email });
     if (!otpDb) {
@@ -204,6 +258,7 @@ exports.isOtpValid = async (req, res, next) => {
         error: "OTP not generated",
       });
     }
+    otp = parseInt(otp);
     if (otpDb.otp !== otp) {
       return res.status(400).json({
         error: "OTP is not valid or expired",

@@ -6,6 +6,9 @@ const {
   signup,
   signin,
   getOtpForPasswordReset,
+  isOtpValid,
+  setNewPassword,
+  signinForRegisteredUser,
 } = require("../controllers/auth");
 
 // use this route only when you need to create admin user manually
@@ -32,6 +35,10 @@ router.post(
 );
 
 router.post("/otp", getOtpForPasswordReset);
+
+router.post("/reset-password", isOtpValid, setNewPassword);
+
+router.post("/signin-registerUser", signinForRegisteredUser);
 
 // router.get('/signout', signout);
 
