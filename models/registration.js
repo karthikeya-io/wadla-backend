@@ -60,7 +60,6 @@ const registrationSchema = new Schema(
     },
     feedback: {
       type: String,
-      maxlength: 5000,
       trim: true,
     },
     registrationFee: {
@@ -78,7 +77,6 @@ const registrationSchema = new Schema(
     },
     paymentReceiptFileOrginalName: {
       type: String,
-      maxlength: 128,
       trim: true,
     },
     PaymentReceiptFileName: {
@@ -87,7 +85,6 @@ const registrationSchema = new Schema(
     },
     idProofFileOrginalName: {
       type: String,
-      maxlength: 128,
       trim: true,
     },
     idProofFileName: {
