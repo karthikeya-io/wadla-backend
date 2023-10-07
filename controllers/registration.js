@@ -7,6 +7,8 @@ const { Readable } = require("stream");
 const getSignedUrl = require("../utils/generateSignedUrlFB");
 const nodeMailer = require("nodemailer");
 const isHuman = require("../utils/reCaptcha");
+const fs = require("fs");
+const path = require("path");
 
 let transporter = nodeMailer.createTransport({
   service: "gmail",
@@ -39,37 +41,18 @@ exports.createRegistration = async (req, res) => {
     const registration = new Registration(data);
     await registration.save();
 
+    const html = fs.readFileSync(
+      path.join(__dirname, "../templates/registration-email.html"),
+      "utf8"
+    );
+
     setImmediate(() => {
       transporter.sendMail(
         {
           from: process.env.EMAIL,
           to: registration.email,
           subject: "Registration Successful 🎉 ",
-          html: `<h1>Registration Successful!</h1>
-          <p>Hi ${registration.name},</p>
-          <p>Thank you for registering for WADLA 2023.</p>
-          <p>Regards,</p>
-          <p
-          style="
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            font-size: .8rem;
-            font-weight: 400;
-            line-spacing: 1px;
-            margin-top: -12px;
-          "
-          >Team Wadla</p>
-          <p
-          style="
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            font-size: .8rem;
-            font-weight: 400;
-            margin-top: -12px;
-          "
-          >For any queries, please contact us at wadla@iiits.in</p>
-          <a
-          href="https://wadla.in"
-          >https://wadla.in</a>
-        `,
+          html: html.replace("{{name}}", registration.name),
         },
         (err, info) => {
           if (err) {
