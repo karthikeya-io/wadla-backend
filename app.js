@@ -14,6 +14,7 @@ const authRoutes = require("./routes/auth");
 const eventRoutes = require("./routes/event");
 const speakerRoutes = require("./routes/speaker");
 const registrationRoutes = require("./routes/registration");
+const feedRoutes = require("./routes/feed");
 
 // middleware
 app.use(bodyParser.json());
@@ -31,6 +32,7 @@ app.use("/api", authRoutes);
 app.use("/api", eventRoutes);
 app.use("/api", speakerRoutes);
 app.use("/api", registrationRoutes);
+app.use("/api", feedRoutes);
 
 // connect to mongoDB
 //DB Connection
