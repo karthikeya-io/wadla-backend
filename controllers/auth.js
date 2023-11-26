@@ -181,7 +181,7 @@ exports.signinForRegisteredUser = async (req, res) => {
     }
     const token = jwt.sign(
       { _id: user._id, event: user.event },
-      process.env.SECRET,
+      process.env.USERSECRET,
       {
         expiresIn: "24h",
       }
@@ -210,7 +210,7 @@ exports.signinForRegisteredUser = async (req, res) => {
 };
 
 // protected routes
-// middle ware
+// middle ware admins
 exports.isSignedIn = (req, res, next) => {
   if (req.headers.authorization === undefined) {
     return res.status(401).json({
@@ -241,6 +241,43 @@ exports.isAuthenticated = (req, res, next) => {
   console.log(req.eventCreatorId);
   const checker =
     req.adminId && req.eventCreatorId && req.eventCreatorId.equals(req.adminId);
+  if (!checker) {
+    return res.status(403).json({
+      error: "ACCESS DENIED",
+    });
+  }
+  next();
+};
+
+// middle ware users
+exports.isUserSignedIn = (req, res, next) => {
+  if (req.headers.authorization === undefined) {
+    return res.status(401).json({
+      error: "Access denied",
+    });
+  }
+  const userToken = req.headers.authorization.split(" ")[1];
+  if (!userToken) {
+    return res.status(401).json({
+      error: "Access denied",
+    });
+  }
+  try {
+    const decoded = jwt.verify(userToken, process.env.USERSECRET);
+    req.user = decoded;
+    req.userId = decoded._id;
+    next();
+  } catch (err) {
+    console.log(err);
+    return res.status(401).json({
+      error: "Access denied",
+    });
+  }
+};
+
+// isUserAuthenticated middleware
+exports.isUserAuthenticated = (req, res, next) => {
+  const checker = req.userId && req.params.uid && req.userId === req.params.uid;
   if (!checker) {
     return res.status(403).json({
       error: "ACCESS DENIED",
